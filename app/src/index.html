@@ -3,169 +3,39 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Agent-Alpha | Studio</title>
-    <link rel="stylesheet" href="/styles.css" />
+    <title>Agent-Alpha</title>
+    <meta http-equiv="refresh" content="0; url=/agent-alpha-overview.html" />
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #07111f;
+        color: #e8eefc;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      main {
+        max-width: 640px;
+        padding: 32px;
+        text-align: center;
+      }
+
+      a {
+        color: #7dd3fc;
+      }
+    </style>
   </head>
   <body>
-    <div class="app-shell">
-      <aside class="sidebar">
-        <div class="brand">
-          <h1>Agent-Alpha Studio</h1>
-          <p>Live multi-agent orchestration</p>
-        </div>
-        <div class="sidebar-meta">
-          <span id="health-pill" class="pill">Checking...</span>
-          <div class="meta-row">
-            <span>Total Runs</span>
-            <strong id="metric-total-runs">0</strong>
-          </div>
-          <div class="meta-row">
-            <span>Active</span>
-            <strong id="metric-active-runs">0</strong>
-          </div>
-        </div>
-      </aside>
-
-      <main class="content">
-        <header class="content-header">
-          <div>
-            <h2>Run Command Center</h2>
-            <p>Launch jobs, monitor execution, and inspect generated reports.</p>
-          </div>
-          <div class="header-tabs">
-            <button id="tab-runs" class="tab-btn active" type="button">Runs</button>
-            <button id="tab-settings" class="tab-btn" type="button">Settings</button>
-          </div>
-        </header>
-
-        <div id="runs-tab-content">
-          <section class="grid two-col">
-            <article class="panel">
-              <div class="panel-head">
-                <h3>Run Builder</h3>
-                <span class="hint">Script: <code>scripts/run_today.py</code></span>
-              </div>
-              <form id="run-form" class="form-grid">
-                <label>
-                  Tickers
-                  <input id="tickers" type="text" placeholder="NVDA,MSFT,AAPL" required />
-                </label>
-                <div class="split">
-                  <label>
-                    Date (optional)
-                    <input id="date" type="date" />
-                  </label>
-                  <label>
-                    Debate Rounds
-                    <input id="debate-rounds" type="number" min="1" max="5" />
-                  </label>
-                </div>
-                <div class="split">
-                  <label>
-                    Provider
-                    <select id="provider"></select>
-                  </label>
-                  <label>
-                    Deep Model
-                    <select id="deep-model"></select>
-                  </label>
-                </div>
-                <label>
-                  Quick Model
-                  <select id="quick-model"></select>
-                </label>
-              <label class="checkbox">
-                <input id="checkpoint" type="checkbox" />
-                Enable checkpoint resume
-              </label>
-                <button class="btn-primary" type="submit">Launch Run</button>
-              </form>
-              <p id="run-message" class="message"></p>
-            </article>
-
-            <article class="panel">
-              <div class="panel-head">
-                <h3>Live Runs</h3>
-                <span class="hint">Auto-refresh every 2s</span>
-              </div>
-              <div id="runs-list" class="runs-list"></div>
-            </article>
-          </section>
-
-          <section class="panel">
-            <div class="panel-head">
-              <h3>Reports</h3>
-              <span class="hint">Output artifacts from <code>outputs/</code></span>
-            </div>
-            <div class="reports-layout">
-              <div id="reports-list" class="reports-list"></div>
-              <article class="report-reader">
-                <h4 id="report-title">Select a report</h4>
-                <div id="report-content" class="report-content"></div>
-              </article>
-            </div>
-          </section>
-        </div>
-
-        <div id="settings-tab-content" class="hidden">
-          <section class="panel">
-            <div class="panel-head">
-              <h3>Settings</h3>
-              <span class="hint">Local dev config and API keys</span>
-            </div>
-            <form id="settings-form" class="form-grid">
-              <div class="split">
-                <label>
-                  Default Provider
-                  <select id="s-provider"></select>
-                </label>
-                <label>
-                  Default Debate Rounds
-                  <input id="s-debate-rounds" type="number" min="1" max="5" />
-                </label>
-              </div>
-              <div class="split">
-                <label>
-                  Default Deep Model
-                  <select id="s-deep-model"></select>
-                </label>
-                <label>
-                  Default Quick Model
-                  <select id="s-quick-model"></select>
-                </label>
-              </div>
-              <label class="checkbox">
-                <input id="s-checkpoint" type="checkbox" />
-                Default checkpoint enabled
-              </label>
-              <div class="split">
-                <label>
-                  OPENAI_API_KEY
-                  <input id="k-openai" type="password" />
-                </label>
-                <label>
-                  ANTHROPIC_API_KEY
-                  <input id="k-anthropic" type="password" />
-                </label>
-              </div>
-              <div class="split">
-                <label>
-                  GOOGLE_API_KEY
-                  <input id="k-google" type="password" />
-                </label>
-                <label>
-                  AZURE_OPENAI_API_KEY
-                  <input id="k-azure" type="password" />
-                </label>
-              </div>
-              <button class="btn-secondary" type="submit">Save Settings</button>
-            </form>
-            <p id="settings-message" class="message"></p>
-          </section>
-        </div>
-      </main>
-    </div>
-
-    <script src="/app.js"></script>
+    <main>
+      <h1>Opening Agent-Alpha overview…</h1>
+      <p>
+        If you are not redirected automatically, open
+        <a href="/agent-alpha-overview.html">the project overview</a>
+        or jump to the
+        <a href="/studio.html">run studio</a>.
+      </p>
+    </main>
   </body>
 </html>
