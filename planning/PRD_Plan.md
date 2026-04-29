@@ -4,11 +4,11 @@
 
 Define requirements to convert this repository into a focused personal-project system:
 
-- simple trading-agents orchestrator
+- simple Agent-Alpha orchestrator
 - script-driven execution for one or many tickers
 - defaults to today's date
 - outputs comprehensive markdown reports to `outputs/`
-- project identity framed as `Multi-Agent-Trading-Agents`
+- project identity framed as `Agent-Alpha`
 
 No implementation is performed in this document. This is the approved PRD baseline for later implementation.
 

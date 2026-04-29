@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "multi-agent-trading-agents"
+name = "agent-alpha"
 version = "0.2.4"
-description = "Multi-Agent-Trading-Agents: script-first trading orchestrator"
+description = "Agent-Alpha: script-first trading orchestrator"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

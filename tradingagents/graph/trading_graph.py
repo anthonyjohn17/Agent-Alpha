@@ -1,4 +1,4 @@
-# TradingAgents/graph/trading_graph.py
+# Agent-Alpha/graph/trading_graph.py
 
 import logging
 import os
@@ -379,7 +379,7 @@ class TradingAgentsGraph:
         }
 
         # Save to file
-        directory = Path(self.config["results_dir"]) / self.ticker / "TradingAgentsStrategy_logs"
+        directory = Path(self.config["results_dir"]) / self.ticker / "AgentAlphaStrategy_logs"
         directory.mkdir(parents=True, exist_ok=True)
 
         log_path = directory / f"full_states_log_{trade_date}.json"

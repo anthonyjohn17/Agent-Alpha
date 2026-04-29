@@ -35,7 +35,7 @@ def build_report_markdown(final_state: dict[str, Any], metadata: dict[str, Any])
 
     return "\n".join(
         [
-            f"# Multi-Agent-Trading-Agents Report: {metadata['ticker']} ({metadata['analysis_date']})",
+            f"# Agent-Alpha Report: {metadata['ticker']} ({metadata['analysis_date']})",
             "",
             "## 1) Run Metadata",
             f"- Run ID: {metadata['run_id']}",
@@ -174,7 +174,7 @@ def write_daily_index(
     index_path = day_dir / "index.md"
 
     lines = [
-        f"# Daily Trading Agents Index ({analysis_date})",
+        f"# Daily Agent-Alpha Index ({analysis_date})",
         "",
         "## Summary",
     ]

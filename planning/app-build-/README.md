@@ -1,6 +1,6 @@
 # App Build Ideation Pack
 
-This folder defines the product and technical direction for building a SaaS-style web app on top of the current script-first trading-agents repository.
+This folder defines the product and technical direction for building a SaaS-style web app on top of the current script-first Agent-Alpha repository.
 
 ## Why This Exists
 

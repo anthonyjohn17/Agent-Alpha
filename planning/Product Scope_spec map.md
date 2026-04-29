@@ -1,4 +1,4 @@
-# Product Scope and Specification Map: Minimal Trading-Agents Orchestrator
+# Product Scope and Specification Map: Minimal Agent-Alpha Orchestrator
 
 ## Scope Statement
 
@@ -198,7 +198,7 @@ Success criteria:
 ## Decision Snapshot
 
 - Recommended path: **Minimal Orchestrator Pivot (script-first, output-first)**.
-- Project naming direction: **Multi-Agent-Trading-Agents** (distribution/project identity).
+- Project naming direction: **Agent-Alpha** (distribution/project identity).
 - Immediate next planning artifact: finalize exact deletion inventory and report schema before any write-capable implementation pass.
 
 ## Evidence Anchors Used

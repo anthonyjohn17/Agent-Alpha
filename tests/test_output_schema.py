@@ -32,7 +32,7 @@ def test_report_contains_required_headings():
 
     report = build_report_markdown(final_state, metadata)
 
-    assert "# Multi-Agent-Trading-Agents Report: NVDA (2026-04-29)" in report
+    assert "# Agent-Alpha Report: NVDA (2026-04-29)" in report
     assert "## 1) Run Metadata" in report
     assert "## 3) Analyst Findings" in report
     assert "## 7) Final Decision" in report

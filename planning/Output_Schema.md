@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Define a strict, durable output contract for the simplified trading-agents orchestrator so that:
+Define a strict, durable output contract for the simplified Agent-Alpha orchestrator so that:
 
 - humans can quickly read daily analysis reports
 - downstream skills can parse reports reliably without brittle heuristics
@@ -53,7 +53,7 @@ This specification is implementation-agnostic and serves as the output contract 
 
 Sections below are **required**, **ordered**, and must use exactly the heading text shown.
 
-1. `# Multi-Agent-Trading-Agents Report: <TICKER> (<YYYY-MM-DD>)`
+1. `# Agent-Alpha Report: <TICKER> (<YYYY-MM-DD>)`
 2. `## 1) Run Metadata`
 3. `## 2) Market Context Snapshot`
 4. `## 3) Analyst Findings`
@@ -291,7 +291,7 @@ Recommended initial version: `1.0.0`.
 ## Golden Example (Minimal Conforming Snippet)
 
 ```md
-# Multi-Agent-Trading-Agents Report: NVDA (2026-04-29)
+# Agent-Alpha Report: NVDA (2026-04-29)
 
 ## 1) Run Metadata
 - Run ID: 2026-04-29-NVDA-001
