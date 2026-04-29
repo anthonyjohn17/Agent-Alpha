@@ -1,0 +1,1097 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agent-Alpha &mdash; Multi-Agent Trading Research Orchestrator</title>
+  <meta name="description" content="A LangGraph-powered multi-agent pipeline that turns ticker symbols into deterministic, auditable investment research reports." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ================================================================
+       DESIGN TOKENS  (primitive → semantic → component)
+       Follows three-layer token architecture from design-system skill.
+       Contrast ratios verified ≥ 4.5:1 per WCAG AA.
+       ================================================================ */
+
+    :root {
+      /* ── Primitive ── */
+      --p-white:    #FFFFFF;
+      --p-gray-50:  #F8FAFC;
+      --p-gray-100: #F1F5F9;
+      --p-gray-200: #E2E8F0;
+      --p-gray-300: #CBD5E1;
+      --p-gray-400: #94A3B8;
+      --p-gray-500: #64748B;
+      --p-gray-600: #475569;
+      --p-gray-700: #334155;
+      --p-gray-800: #1E293B;
+      --p-gray-900: #0F172A;
+      --p-gray-950: #020617;
+      --p-blue-400: #60A5FA;
+      --p-blue-500: #3B82F6;
+      --p-blue-600: #2563EB;
+      --p-violet-400:#A78BFA;
+      --p-violet-500:#8B5CF6;
+      --p-emerald-400:#34D399;
+      --p-emerald-500:#10B981;
+      --p-amber-400: #FBBF24;
+      --p-rose-400:  #FB7185;
+      --p-sky-400:   #38BDF8;
+
+      /* ── Semantic ── */
+      --color-bg:          var(--p-gray-950);
+      --color-bg-elevated: var(--p-gray-900);
+      --color-bg-card:     rgba(15, 23, 42, 0.70);
+      --color-bg-card-hover: rgba(30, 41, 59, 0.60);
+      --color-surface:     rgba(30, 41, 59, 0.45);
+      --color-border:      rgba(148, 163, 184, 0.12);
+      --color-border-hover:rgba(148, 163, 184, 0.24);
+      --color-text:        var(--p-gray-50);
+      --color-text-secondary: var(--p-gray-400);
+      --color-text-tertiary: var(--p-gray-500);
+      --color-primary:     var(--p-blue-500);
+      --color-primary-fg:  var(--p-white);
+      --color-accent:      var(--p-violet-400);
+      --color-success:     var(--p-emerald-400);
+      --color-warning:     var(--p-amber-400);
+      --color-danger:      var(--p-rose-400);
+
+      /* ── Typography ── */
+      --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --text-xs:   0.75rem;
+      --text-sm:   0.875rem;
+      --text-base: 1rem;
+      --text-lg:   1.125rem;
+      --text-xl:   1.25rem;
+      --text-2xl:  1.5rem;
+      --text-3xl:  1.875rem;
+      --text-4xl:  2.25rem;
+      --text-5xl:  3rem;
+      --text-6xl:  3.75rem;
+      --leading-tight:  1.15;
+      --leading-snug:   1.35;
+      --leading-normal: 1.6;
+      --leading-relaxed:1.75;
+      --tracking-tight: -0.025em;
+      --tracking-normal: 0;
+      --tracking-wide:  0.05em;
+
+      /* ── Spacing (4px base) ── */
+      --space-1:  4px;   --space-2:  8px;   --space-3:  12px;
+      --space-4:  16px;  --space-5:  20px;  --space-6:  24px;
+      --space-8:  32px;  --space-10: 40px;  --space-12: 48px;
+      --space-16: 64px;  --space-20: 80px;  --space-24: 96px;
+
+      /* ── Radii ── */
+      --radius-sm:  8px;
+      --radius-md:  12px;
+      --radius-lg:  16px;
+      --radius-xl:  24px;
+      --radius-full:9999px;
+
+      /* ── Shadows ── */
+      --shadow-sm:  0 1px 2px rgba(0,0,0,0.3);
+      --shadow-md:  0 4px 16px rgba(0,0,0,0.25);
+      --shadow-lg:  0 12px 40px rgba(0,0,0,0.3);
+      --shadow-xl:  0 24px 64px rgba(0,0,0,0.35);
+      --shadow-glow:0 0 60px rgba(59,130,246,0.15);
+
+      /* ── Motion ── */
+      --duration-fast:   150ms;
+      --duration-normal: 250ms;
+      --duration-slow:   400ms;
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+      /* ── Layout ── */
+      --max-w: 1200px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* ================================================================
+       BASE RESET + GLOBAL
+       ================================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+    body {
+      font-family: var(--font-sans);
+      font-size: var(--text-base);
+      line-height: var(--leading-normal);
+      color: var(--color-text);
+      background: var(--color-bg);
+      overflow-x: hidden;
+    }
+
+    ::selection { background: rgba(59,130,246,0.35); color: var(--p-white); }
+
+    a { color: inherit; text-decoration: none; }
+    a:focus-visible, button:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+      border-radius: var(--radius-sm);
+    }
+
+    img { max-width: 100%; display: block; }
+    code { font-family: var(--font-mono); font-size: 0.9em; }
+
+    /* ================================================================
+       AMBIENT BACKGROUND
+       ================================================================ */
+    .ambient {
+      position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background:
+        radial-gradient(ellipse 70% 50% at 20% 10%, rgba(59,130,246,0.12), transparent),
+        radial-gradient(ellipse 60% 40% at 80% 15%, rgba(139,92,246,0.10), transparent),
+        radial-gradient(ellipse 50% 50% at 50% 90%, rgba(16,185,129,0.06), transparent);
+    }
+
+    .grid-overlay {
+      position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(148,163,184,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148,163,184,0.04) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: linear-gradient(180deg, rgba(0,0,0,0.5) 0%, transparent 70%);
+    }
+
+    /* ================================================================
+       NAVIGATION
+       ================================================================ */
+    .nav {
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      background: rgba(2, 6, 23, 0.80);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .nav-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: var(--space-4) var(--space-6);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+    }
+
+    .nav-brand {
+      display: flex; align-items: center; gap: var(--space-3);
+    }
+
+    .nav-logo {
+      width: 36px; height: 36px;
+      border-radius: var(--radius-md);
+      display: grid; place-items: center;
+      font-weight: 800; font-size: var(--text-sm);
+      letter-spacing: var(--tracking-wide);
+      color: var(--color-bg);
+      background: linear-gradient(135deg, var(--p-blue-400), var(--p-violet-400));
+    }
+
+    .nav-title {
+      font-size: var(--text-sm);
+      font-weight: 700;
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+      color: var(--color-text);
+    }
+
+    .nav-links {
+      display: flex; flex-wrap: wrap; gap: var(--space-1);
+    }
+
+    .nav-links a {
+      padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius-full);
+      font-size: var(--text-sm);
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      transition: color var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out);
+    }
+
+    .nav-links a:hover {
+      color: var(--color-text);
+      background: var(--color-surface);
+    }
+
+    /* ================================================================
+       SECTION WRAPPER
+       ================================================================ */
+    .w { max-width: var(--max-w); margin: 0 auto; padding: 0 var(--space-6); }
+
+    section { padding: var(--space-20) 0; }
+
+    .section-label {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      font-size: var(--text-xs); font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--p-blue-400);
+      margin-bottom: var(--space-4);
+    }
+
+    .section-label::before {
+      content: ""; display: block;
+      width: 20px; height: 1px; background: var(--p-blue-400);
+    }
+
+    .section-title {
+      font-size: var(--text-3xl); font-weight: 800;
+      letter-spacing: var(--tracking-tight);
+      line-height: var(--leading-tight);
+      margin-bottom: var(--space-3);
+    }
+
+    .section-desc {
+      max-width: 64ch;
+      color: var(--color-text-secondary);
+      line-height: var(--leading-relaxed);
+    }
+
+    .section-header { margin-bottom: var(--space-12); }
+
+    /* ================================================================
+       HERO
+       ================================================================ */
+    .hero {
+      padding: var(--space-24) 0 var(--space-20);
+      position: relative;
+    }
+
+    .hero-inner { max-width: 760px; }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      padding: var(--space-2) var(--space-4);
+      border-radius: var(--radius-full);
+      font-size: var(--text-xs); font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--p-blue-400);
+      background: rgba(59,130,246,0.08);
+      border: 1px solid rgba(59,130,246,0.16);
+      margin-bottom: var(--space-8);
+    }
+
+    .hero-badge-dot {
+      width: 6px; height: 6px;
+      border-radius: var(--radius-full);
+      background: var(--p-emerald-400);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .hero h1 {
+      font-size: clamp(var(--text-4xl), 6vw, var(--text-6xl));
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.035em;
+      margin-bottom: var(--space-6);
+    }
+
+    .hero h1 .gradient {
+      background: linear-gradient(135deg, var(--p-blue-400), var(--p-violet-400), var(--p-emerald-400));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-lead {
+      font-size: var(--text-lg);
+      color: var(--color-text-secondary);
+      line-height: var(--leading-relaxed);
+      max-width: 60ch;
+      margin-bottom: var(--space-10);
+    }
+
+    .hero-actions { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      padding: var(--space-3) var(--space-5);
+      border-radius: var(--radius-full);
+      font-size: var(--text-sm); font-weight: 600;
+      border: none; cursor: pointer;
+      transition: transform var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+
+    .btn-primary {
+      color: var(--color-bg);
+      background: linear-gradient(135deg, var(--p-blue-400) 0%, var(--p-blue-500) 100%);
+      box-shadow: 0 4px 16px rgba(59,130,246,0.25);
+    }
+
+    .btn-primary:hover { box-shadow: 0 8px 24px rgba(59,130,246,0.35); }
+
+    .btn-ghost {
+      color: var(--color-text-secondary);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+    }
+
+    .btn-ghost:hover { color: var(--color-text); border-color: var(--color-border-hover); }
+
+    .hero-stats {
+      display: flex; flex-wrap: wrap; gap: var(--space-8);
+      margin-top: var(--space-12);
+      padding-top: var(--space-8);
+      border-top: 1px solid var(--color-border);
+    }
+
+    .stat-num {
+      font-size: var(--text-3xl); font-weight: 800;
+      letter-spacing: var(--tracking-tight);
+      background: linear-gradient(135deg, var(--color-text), var(--color-text-secondary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      font-size: var(--text-sm);
+      color: var(--color-text-tertiary);
+      margin-top: var(--space-1);
+    }
+
+    /* ================================================================
+       CARDS (universal)
+       ================================================================ */
+    .card {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-8);
+      transition: border-color var(--duration-normal) var(--ease-out), box-shadow var(--duration-normal) var(--ease-out);
+      backdrop-filter: blur(12px);
+    }
+
+    .card:hover {
+      border-color: var(--color-border-hover);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .card-icon {
+      width: 40px; height: 40px;
+      border-radius: var(--radius-md);
+      display: grid; place-items: center;
+      font-size: var(--text-lg);
+      margin-bottom: var(--space-5);
+    }
+
+    .card h3 {
+      font-size: var(--text-lg); font-weight: 700;
+      letter-spacing: var(--tracking-tight);
+      margin-bottom: var(--space-3);
+    }
+
+    .card p { color: var(--color-text-secondary); line-height: var(--leading-relaxed); }
+
+    .card-list {
+      list-style: none; margin-top: var(--space-4);
+      display: grid; gap: var(--space-2);
+    }
+
+    .card-list li {
+      position: relative; padding-left: var(--space-5);
+      color: var(--color-text-secondary); line-height: var(--leading-relaxed);
+    }
+
+    .card-list li::before {
+      content: ""; position: absolute;
+      left: 0; top: 0.65em;
+      width: 6px; height: 6px;
+      border-radius: var(--radius-full);
+      background: var(--p-blue-400);
+      opacity: 0.6;
+    }
+
+    /* ================================================================
+       GRIDS
+       ================================================================ */
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-6); }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-6); }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-5); }
+
+    /* ================================================================
+       PIPELINE
+       ================================================================ */
+    .pipeline-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: var(--space-4);
+    }
+
+    .stage {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      position: relative;
+      transition: border-color var(--duration-normal) var(--ease-out);
+    }
+
+    .stage:hover { border-color: var(--color-border-hover); }
+
+    .stage-num {
+      width: 28px; height: 28px;
+      border-radius: var(--radius-full);
+      display: grid; place-items: center;
+      font-size: var(--text-xs); font-weight: 700;
+      color: var(--color-bg);
+      background: linear-gradient(135deg, var(--p-blue-400), var(--p-violet-400));
+      margin-bottom: var(--space-4);
+    }
+
+    .stage h4 {
+      font-size: var(--text-base); font-weight: 700;
+      margin-bottom: var(--space-2);
+    }
+
+    .stage p {
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+      line-height: var(--leading-relaxed);
+    }
+
+    /* ================================================================
+       AGENTS
+       ================================================================ */
+    .agent {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      display: flex; flex-direction: column;
+      transition: border-color var(--duration-normal) var(--ease-out), transform var(--duration-normal) var(--ease-out);
+    }
+
+    .agent:hover { border-color: var(--color-border-hover); transform: translateY(-2px); }
+
+    .agent-role {
+      font-size: var(--text-xs); font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      margin-bottom: var(--space-2);
+    }
+
+    .agent h4 {
+      font-size: var(--text-base); font-weight: 700;
+      margin-bottom: var(--space-2);
+    }
+
+    .agent p {
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+      line-height: var(--leading-relaxed);
+      flex: 1;
+    }
+
+    .agent-detail {
+      margin-top: var(--space-3);
+      padding-top: var(--space-3);
+      border-top: 1px solid var(--color-border);
+      font-size: var(--text-xs);
+      color: var(--color-text-tertiary);
+      font-family: var(--font-mono);
+    }
+
+    .role-analyst  { color: var(--p-sky-400); }
+    .role-research { color: var(--p-violet-400); }
+    .role-manager  { color: var(--p-blue-400); }
+    .role-exec     { color: var(--p-emerald-400); }
+    .role-risk     { color: var(--p-amber-400); }
+    .role-final    { color: var(--p-rose-400); }
+
+    /* ================================================================
+       CODE PREVIEW
+       ================================================================ */
+    .code-block {
+      background: rgba(2,6,23,0.85);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-5);
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      line-height: var(--leading-relaxed);
+      color: var(--p-gray-300);
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .code-block .hl { color: var(--p-blue-400); }
+    .code-block .cm { color: var(--p-gray-600); }
+    .code-block .str { color: var(--p-emerald-400); }
+    .code-block .key { color: var(--p-violet-400); }
+
+    /* ================================================================
+       REPO MAP
+       ================================================================ */
+    .repo-item {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-8);
+      transition: border-color var(--duration-normal) var(--ease-out);
+    }
+
+    .repo-item:hover { border-color: var(--color-border-hover); }
+
+    .repo-path {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      font-weight: 500;
+      color: var(--p-blue-400);
+      background: rgba(59,130,246,0.08);
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(59,130,246,0.12);
+      margin-bottom: var(--space-4);
+    }
+
+    .repo-item h3 {
+      font-size: var(--text-lg); font-weight: 700;
+      margin-bottom: var(--space-2);
+    }
+
+    .repo-item p {
+      color: var(--color-text-secondary);
+      line-height: var(--leading-relaxed);
+      margin-bottom: var(--space-3);
+    }
+
+    /* ================================================================
+       BADGES / PILLS
+       ================================================================ */
+    .tag-row { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-4); }
+
+    .tag {
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-full);
+      font-size: var(--text-xs); font-weight: 500;
+      color: var(--p-gray-300);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+    }
+
+    /* ================================================================
+       CALLOUT
+       ================================================================ */
+    .callout {
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-8);
+    }
+
+    .callout h3 {
+      font-size: var(--text-xl); font-weight: 700;
+      margin-bottom: var(--space-3);
+    }
+
+    .callout p {
+      color: var(--color-text-secondary);
+      line-height: var(--leading-relaxed);
+    }
+
+    /* ================================================================
+       FOOTER
+       ================================================================ */
+    .site-footer {
+      padding: var(--space-12) 0;
+      border-top: 1px solid var(--color-border);
+    }
+
+    .site-footer p {
+      color: var(--color-text-tertiary);
+      font-size: var(--text-sm);
+      line-height: var(--leading-relaxed);
+      max-width: 72ch;
+    }
+
+    .footer-links {
+      display: flex; gap: var(--space-6);
+      margin-top: var(--space-4);
+    }
+
+    .footer-links a {
+      font-size: var(--text-sm); font-weight: 500;
+      color: var(--color-text-secondary);
+      transition: color var(--duration-fast);
+    }
+
+    .footer-links a:hover { color: var(--color-text); }
+
+    /* ================================================================
+       RESPONSIVE  (mobile-first breakpoints)
+       ================================================================ */
+    @media (max-width: 1080px) {
+      .pipeline-grid { grid-template-columns: repeat(3, 1fr); }
+      .grid-4 { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    @media (max-width: 860px) {
+      .nav-links { display: none; }
+      .hero { padding: var(--space-16) 0 var(--space-12); }
+      .section-title { font-size: var(--text-2xl); }
+      section { padding: var(--space-16) 0; }
+      .grid-2, .grid-3, .pipeline-grid, .grid-4 { grid-template-columns: repeat(2, 1fr); }
+      .hero-stats { gap: var(--space-6); }
+    }
+
+    @media (max-width: 600px) {
+      .grid-2, .grid-3, .pipeline-grid, .grid-4 { grid-template-columns: 1fr; }
+      .hero-stats { flex-direction: column; gap: var(--space-4); }
+      .w { padding: 0 var(--space-4); }
+      .card, .callout, .repo-item, .stage, .agent { padding: var(--space-5); }
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient"></div>
+  <div class="grid-overlay"></div>
+
+  <!-- ────────────────────────── NAV ────────────────────────── -->
+  <nav class="nav" role="navigation" aria-label="Primary">
+    <div class="nav-inner">
+      <a href="#" class="nav-brand" aria-label="Agent-Alpha home">
+        <div class="nav-logo" aria-hidden="true">A</div>
+        <span class="nav-title">Agent-Alpha</span>
+      </a>
+      <div class="nav-links">
+        <a href="#overview">Overview</a>
+        <a href="#pipeline">Pipeline</a>
+        <a href="#agents">Agents</a>
+        <a href="#repo">Repository</a>
+        <a href="#outputs">Outputs</a>
+        <a href="#roadmap">Roadmap</a>
+        <a href="https://github.com/anthonyjohn17/Agent-Alpha" target="_blank" rel="noopener">Source Code</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ────────────────────────── HERO ────────────────────────── -->
+  <section class="hero" id="overview">
+    <div class="w">
+      <div class="hero-inner">
+        <div class="hero-badge">
+          <span class="hero-badge-dot" aria-hidden="true"></span>
+          v0.2.4 &middot; Apache-2.0 &middot; Python 3.10+
+        </div>
+
+        <h1>Transparent, <span class="gradient">debate-driven</span> investment research.</h1>
+
+        <p class="hero-lead">
+          Agent-Alpha is a LangGraph-powered multi-agent pipeline that turns one or many ticker symbols into deterministic
+          markdown and JSON research reports. Specialist analysts, adversarial researchers, a trader, a risk committee, and a
+          portfolio manager collaborate through structured disagreement to produce auditable, five-tier investment recommendations.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#pipeline" class="btn btn-primary">See the Pipeline</a>
+          <a href="https://github.com/anthonyjohn17/Agent-Alpha" class="btn btn-ghost" target="_blank" rel="noopener">View on GitHub</a>
+          <a href="https://github.com/anthonyjohn17/Agent-Alpha" class="btn btn-ghost" target="_blank" rel="noopener">GitHub</a>
+        </div>
+      </div>
+
+      <div class="hero-stats">
+        <div><div class="stat-num">12</div><div class="stat-label">Named Agent Roles</div></div>
+        <div><div class="stat-num">10</div><div class="stat-label">LLM Providers</div></div>
+        <div><div class="stat-num">5-tier</div><div class="stat-label">Decision Scale</div></div>
+        <div><div class="stat-num">11</div><div class="stat-label">Report Sections</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────────────────────── VALUE PROPS ────────────────────────── -->
+  <section>
+    <div class="w">
+      <div class="section-header">
+        <div class="section-label">Why Agent-Alpha</div>
+        <h2 class="section-title">A new category of research tooling</h2>
+        <p class="section-desc">
+          Most trading systems are rigid rule engines or opaque ML models. Agent-Alpha sits in the middle: every recommendation
+          comes with an inspectable reasoning trail, from analyst findings through adversarial debate to final decision.
+        </p>
+      </div>
+
+      <div class="grid-3">
+        <article class="card">
+          <div class="card-icon" style="background:rgba(59,130,246,0.1); color:var(--p-blue-400);">&#9670;</div>
+          <h3>Auditable by design</h3>
+          <p>Stable markdown reports with deterministic section headings, structured metadata, and a daily index. Built for human review and downstream machine ingestion alike.</p>
+        </article>
+
+        <article class="card">
+          <div class="card-icon" style="background:rgba(139,92,246,0.1); color:var(--p-violet-400);">&#9674;</div>
+          <h3>Conflict as signal</h3>
+          <p>The system intentionally manufactures disagreement. Bull and bear researchers debate, then three risk debaters pressure-test exposure before the portfolio manager decides.</p>
+        </article>
+
+        <article class="card">
+          <div class="card-icon" style="background:rgba(16,185,129,0.1); color:var(--p-emerald-400);">&#9651;</div>
+          <h3>Memory without training</h3>
+          <p>An append-only decision log tracks outcomes, computes alpha versus SPY, and reflects lessons back into future runs. Lightweight learning without fine-tuning new weights.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────────────────────── PIPELINE ────────────────────────── -->
+  <section id="pipeline">
+    <div class="w">
+      <div class="section-header">
+        <div class="section-label">Execution Pipeline</div>
+        <h2 class="section-title">How a run moves through the graph</h2>
+        <p class="section-desc">
+          A directed LangGraph workflow stages analysts, debate, synthesis, risk review, and a final decision into a single deterministic pass.
+        </p>
+      </div>
+
+      <div class="pipeline-grid">
+        <article class="stage">
+          <div class="stage-num">1</div>
+          <h4>Analyst Intake</h4>
+          <p>Four specialists (market, sentiment, news, fundamentals) collect tool-backed evidence and write independent reports.</p>
+        </article>
+        <article class="stage">
+          <div class="stage-num">2</div>
+          <h4>Tool Loops</h4>
+          <p>Each analyst cycles through LangChain tool nodes until continuation logic is satisfied, then messages are cleared.</p>
+        </article>
+        <article class="stage">
+          <div class="stage-num">3</div>
+          <h4>Bull vs Bear</h4>
+          <p>Two structurally opposed researchers debate across configurable rounds, sharpening disagreement into synthesis.</p>
+        </article>
+        <article class="stage">
+          <div class="stage-num">4</div>
+          <h4>Trade + Risk</h4>
+          <p>Research manager writes the plan, trader proposes action, and three risk debaters cycle aggressive/conservative/neutral.</p>
+        </article>
+        <article class="stage">
+          <div class="stage-num">5</div>
+          <h4>Portfolio Decision</h4>
+          <p>The PM receives the full chain plus memory-log context, writes the final rating, and logs state for future reflection.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────────────────────── AGENTS ────────────────────────── -->
+  <section id="agents">
+    <div class="w">
+      <div class="section-header">
+        <div class="section-label">Agent System</div>
+        <h2 class="section-title">The complete runtime cast</h2>
+        <p class="section-desc">
+          Named roles, not anonymous prompt fragments. Each agent occupies a specific graph node, uses the quick or deep model profile, and contributes a distinct artifact.
+        </p>
+      </div>
+
+      <div class="grid-4">
+        <article class="agent">
+          <div class="agent-role role-analyst">Analyst</div>
+          <h4>Market Analyst</h4>
+          <p>Price action, indicators, and technical trend context.</p>
+          <div class="agent-detail">get_stock_data, get_indicators</div>
+        </article>
+        <article class="agent">
+          <div class="agent-role role-analyst">Analyst</div>
+          <h4>Sentiment Analyst</h4>
+          <p>Public mood and positioning signals from news-backed sentiment.</p>
+          <div class="agent-detail">social analysis node</div>
+        </article>
+        <article class="agent">
+          <div class="agent-role role-analyst">Analyst</div>
+          <h4>News Analyst</h4>
+          <p>Company and macro developments, global news, insider activity.</p>
+          <div class="agent-detail">get_news, get_global_news, get_insider_transactions</div>
+        </article>
+        <article class="agent">
+          <div class="agent-role role-analyst">Analyst</div>
+          <h4>Fundamentals Analyst</h4>
+          <p>Financial statements, cash flow, income statement, balance sheet.</p>
+          <div class="agent-detail">get_fundamentals, get_balance_sheet, get_cashflow</div>
+        </article>
+        <article class="agent">
+          <div class="agent-role role-research">Research</div>
+          <h4>Bull Researcher</h4>
+          <p>Constructs and defends the strongest upside case from analyst reports.</p>
+          <div class="agent-detail">multi-round adversarial debate</div>
+        </article>
+        <article class="agent">
+          <div class="agent-role role-research">Research</div>
+          <h4>Bear Researcher</h4>
+          <p>Challenges optimism and argues the downside, forcing robust synthesis.</p>
+          <div class="agent-detail">alternates with bull until debate ends</div>
+        </article>
+        <article class="agent">
+          <div class="agent-role role-manager">Manager</div>
+          <h4>Research Manager</h4>
+          <p>Synthesizes debate into a structured plan with five-tier rating scale.</p>
+          <div class="agent-detail">deep-thinking model profile</div>
+        </article>
+        <article class="agent">
+          <div class="agent-role role-exec">Execution</div>
+          <h4>Trader</h4>
+          <p>Turns the research plan into an actionable proposal with position guidance.</p>
+          <div class="agent-detail">feeds the risk stage</div>
+        </article>
+        <article class="agent">
+          <div class="agent-role role-risk">Risk</div>
+          <h4>Aggressive Analyst</h4>
+          <p>Pushes for conviction and higher exposure where thesis is strong.</p>
+          <div class="agent-detail">rotating risk trio</div>
+        </article>
+        <article class="agent">
+          <div class="agent-role role-risk">Risk</div>
+          <h4>Conservative Analyst</h4>
+          <p>Focuses on downside, fragility, and event-risk containment.</p>
+          <div class="agent-detail">checks over-exposure</div>
+        </article>
+        <article class="agent">
+          <div class="agent-role role-risk">Risk</div>
+          <h4>Neutral Analyst</h4>
+          <p>Balances aggressive and defensive positions to keep committee grounded.</p>
+          <div class="agent-detail">routes back into risk cycle</div>
+        </article>
+        <article class="agent">
+          <div class="agent-role role-final">Decision</div>
+          <h4>Portfolio Manager</h4>
+          <p>Receives the full chain plus memory-log context and issues the final rating.</p>
+          <div class="agent-detail">deep-thinking model &middot; decision owner</div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────────────────────── REPO MAP ────────────────────────── -->
+  <section id="repo">
+    <div class="w">
+      <div class="section-header">
+        <div class="section-label">Repository</div>
+        <h2 class="section-title">Project structure at a glance</h2>
+        <p class="section-desc">
+          The repo is organized around a script-first operational core, a minimal local web app, structured planning docs, and a comprehensive test suite.
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <article class="repo-item">
+          <div class="repo-path">tradingagents/</div>
+          <h3>Domain core</h3>
+          <p>Installable Python package with graph orchestration, agent roles, LLM provider adapters, dataflow helpers, deterministic reporting, and shared config.</p>
+          <ul class="card-list">
+            <li><strong>graph/</strong> &mdash; workflow setup, routing, checkpointing, reflection, signal processing</li>
+            <li><strong>agents/</strong> &mdash; analysts, researchers, managers, trader, risk, schemas</li>
+            <li><strong>llm_clients/</strong> &mdash; factory pattern with per-provider client adapters</li>
+            <li><strong>reporting.py</strong> &mdash; deterministic markdown + JSON serialization</li>
+          </ul>
+        </article>
+        <article class="repo-item">
+          <div class="repo-path">scripts/</div>
+          <h3>Operational entrypoints</h3>
+          <p>The primary interface for running analyses. Supports single and batch tickers, provider selection, model override, debate rounds, and checkpoint resume.</p>
+          <ul class="card-list">
+            <li><strong>run_today.py</strong> &mdash; daily orchestrator CLI</li>
+            <li><strong>run_batch.py</strong> &mdash; thin batch wrapper</li>
+            <li><strong>smoke_structured_output.py</strong> &mdash; provider sanity check</li>
+          </ul>
+        </article>
+        <article class="repo-item">
+          <div class="repo-path">app/</div>
+          <h3>Local web UI</h3>
+          <p>Lightweight stdlib HTTP server and static frontend for launching runs, saving defaults and API keys, monitoring jobs, and browsing generated reports.</p>
+          <ul class="card-list">
+            <li><strong>server.py</strong> &mdash; threaded local API + static server</li>
+            <li><strong>src/</strong> &mdash; vanilla HTML/CSS/JS interface</li>
+          </ul>
+        </article>
+        <article class="repo-item">
+          <div class="repo-path">planning/</div>
+          <h3>Product and technical docs</h3>
+          <p>Product overview, output schema contract, and a SaaS Studio vision that maps the evolution from a local script wrapper to a production AI operations platform.</p>
+          <ul class="card-list">
+            <li><strong>Product_overview.md</strong> &mdash; product-language summary</li>
+            <li><strong>Output_Schema.md</strong> &mdash; strict report contract</li>
+            <li><strong>app-build-/</strong> &mdash; SaaS PRD, architecture, roadmap</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────────────────────── OUTPUTS ────────────────────────── -->
+  <section id="outputs">
+    <div class="w">
+      <div class="section-header">
+        <div class="section-label">Output Artifacts</div>
+        <h2 class="section-title">What a successful run produces</h2>
+        <p class="section-desc">
+          Reports follow a strict schema contract designed for both human review and machine ingestion. Every field has a defined type, location, and validation level.
+        </p>
+      </div>
+
+      <div class="grid-3">
+        <div class="callout">
+          <h3><code>report.md</code></h3>
+          <p>Canonical analysis report with 11 required sections.</p>
+          <div class="code-block" role="img" aria-label="report.md preview"># Agent-Alpha Report: NVDA (2026-04-29)
+
+## 1) Run Metadata
+- Run ID: 2026-04-29-NVDA-001
+- Provider: openai
+- Model(s): gpt-5.4, gpt-5.4-mini
+
+## 4) Debate Synthesis
+- Debate Outcome: Bull
+- Why: AI infrastructure leadership...
+
+## 7) Final Decision
+- <span class="hl">Final Rating: Overweight</span>
+- Suggested Portfolio Weight: 2-3%</div>
+        </div>
+
+        <div class="callout">
+          <h3><code>metadata.json</code></h3>
+          <p>Machine-parseable run metadata mirroring report primitives.</p>
+          <div class="code-block" role="img" aria-label="metadata.json preview">{
+  <span class="key">"schema_version"</span>: <span class="str">"1.0.0"</span>,
+  <span class="key">"ticker"</span>: <span class="str">"NVDA"</span>,
+  <span class="key">"analysis_date"</span>: <span class="str">"2026-04-29"</span>,
+  <span class="key">"provider"</span>: <span class="str">"openai"</span>,
+  <span class="key">"models"</span>: [<span class="str">"gpt-5.4"</span>, <span class="str">"gpt-5.4-mini"</span>],
+  <span class="key">"final_rating"</span>: <span class="str">"Overweight"</span>,
+  <span class="key">"overall_confidence"</span>: 0.74
+}</div>
+        </div>
+
+        <div class="callout">
+          <h3>Directory layout</h3>
+          <p>Date-first folder structure with daily index aggregation.</p>
+          <div class="code-block" role="img" aria-label="Directory structure">outputs/
+  2026-04-29/
+    index.md
+    NVDA/
+      report.md
+      metadata.json
+    MSFT/
+      report.md
+      metadata.json
+  _internal_logs/
+  _cache/</div>
+        </div>
+      </div>
+
+      <div class="tag-row" style="margin-top:var(--space-8);">
+        <span class="tag">Buy</span>
+        <span class="tag">Overweight</span>
+        <span class="tag">Hold</span>
+        <span class="tag">Underweight</span>
+        <span class="tag">Sell</span>
+        <span class="tag" style="border-color:rgba(59,130,246,0.2);color:var(--p-blue-400);">Five-tier decision scale</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────────────────────── TECH + COMMANDS ────────────────────────── -->
+  <section>
+    <div class="w">
+      <div class="grid-2">
+        <div class="callout">
+          <h3>Quick start</h3>
+          <div class="code-block">python -m venv .venv
+source .venv/bin/activate
+pip install .
+cp .env.example .env       <span class="cm"># set provider key</span>
+
+python scripts/run_today.py --ticker NVDA
+python scripts/run_today.py --tickers NVDA,MSFT,AAPL
+python scripts/run_today.py --ticker NVDA --checkpoint
+
+python app/server.py        <span class="cm"># http://127.0.0.1:8787</span></div>
+        </div>
+
+        <div class="callout">
+          <h3>Technology</h3>
+          <ul class="card-list">
+            <li><strong>LangGraph</strong> &mdash; directed graph orchestration and checkpointing</li>
+            <li><strong>LangChain</strong> &mdash; provider integrations (OpenAI, Anthropic, Google, Azure, xAI, DeepSeek, Qwen, GLM, Ollama, OpenRouter)</li>
+            <li><strong>yfinance + stockstats</strong> &mdash; market data and indicators</li>
+            <li><strong>pandas</strong> &mdash; data manipulation and analysis</li>
+            <li><strong>Pytest</strong> &mdash; output schema, ticker, checkpoint, memory, signal tests</li>
+            <li><strong>stdlib HTTP + vanilla JS</strong> &mdash; local app and control room</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────────────────────── ROADMAP ────────────────────────── -->
+  <section id="roadmap">
+    <div class="w">
+      <div class="section-header">
+        <div class="section-label">Roadmap</div>
+        <h2 class="section-title">Future product direction</h2>
+        <p class="section-desc">
+          The planning docs describe the evolution from script-first local execution to a polished SaaS AI operations platform with
+          live runs, agent discovery, report history, and enterprise controls.
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <div class="callout">
+          <h3>Planned experiences</h3>
+          <ul class="card-list">
+            <li>Agent Gallery with role, responsibility, and pipeline position</li>
+            <li>Run Builder with validation, presets, and multi-ticker config</li>
+            <li>Live Run Console with timeline, logs, and retry controls</li>
+            <li>Report history, comparison views, and richer metadata panels</li>
+            <li>Admin and policy layers for quotas, credentials, and RBAC</li>
+          </ul>
+        </div>
+        <div class="callout">
+          <h3>Planned architecture</h3>
+          <ul class="card-list">
+            <li>Frontend app for dashboard, reports, settings, and admin</li>
+            <li>API service for auth, runs, settings, and artifact retrieval</li>
+            <li>Worker service reusing the Python orchestration core</li>
+            <li>Queue, database, object storage, realtime channel, observability</li>
+            <li>Tenant-aware security, encrypted secrets, and audit logs</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────────────────────── FOOTER ────────────────────────── -->
+  <footer class="site-footer">
+    <div class="w">
+      <p>
+        Agent-Alpha is a research and educational trading-analysis system. It is not financial advice and does not execute live trades.
+        Apache-2.0 license.
+      </p>
+      <div class="footer-links">
+        <a href="https://github.com/anthonyjohn17/Agent-Alpha" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/anthonyjohn17/Agent-Alpha" target="_blank" rel="noopener">Source Code</a>
+        <a href="#overview">Back to top</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
