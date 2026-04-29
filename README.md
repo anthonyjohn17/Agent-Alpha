@@ -106,7 +106,6 @@ pytest tests/test_output_schema.py tests/test_ticker_symbol_handling.py
 ## Legal and Attribution
 
 - License is Apache-2.0 (`LICENSE`).
-- Historical project lineage and prior contributions are retained in `CHANGELOG.md`.
 
 ## Roadmap (Near-Term)
 
