@@ -1,0 +1,18 @@
+{
+  "defaults": {
+    "provider": "openai",
+    "deep_model": "gpt-5.4",
+    "quick_model": "gpt-5.4-mini",
+    "debate_rounds": 1,
+    "checkpoint": false
+  },
+  "api_keys": {
+    "OPENAI_API_KEY": "",
+    "ANTHROPIC_API_KEY": "",
+    "GOOGLE_API_KEY": "",
+    "AZURE_OPENAI_API_KEY": ""
+  },
+  "ui": {
+    "auto_refresh_seconds": 2
+  }
+}
